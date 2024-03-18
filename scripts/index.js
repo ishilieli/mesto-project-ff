@@ -38,14 +38,16 @@ class Card {
         Card.storage_array.push({
             name: `${this.element.querySelector('.card__title').textContent}`,
             link: `${this.element.querySelector('.card__image').src}`,
+            id: this.id,
         });
     }
 
     addListeners() {
         this.element.querySelector('.card__delete-button').addEventListener('click', function () {
-            Card.storage_array.splice(parseInt(this.closest('.card').dataset.id), 1);
-            Card.storageUpdate();
+            let removeIndex = Card.storage_array.findIndex(item => item.id === parseInt(this.closest('.card').dataset.id)),
+                removedCard = Card.storage_array.splice(removeIndex, 1);
             this.closest('.card').remove();
+            void Card.storageUpdate();
         });
         this.element.querySelector('.card__like-button').addEventListener('click', function () {
             this.classList.toggle('is-active');
@@ -63,5 +65,3 @@ array.forEach(function (item, id) {
 });
 
 Card.storageUpdate();
-
-////localStorage.clear() for reset
