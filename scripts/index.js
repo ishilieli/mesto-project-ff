@@ -17,7 +17,6 @@ const container = document.querySelector('.content'),
     array = localStorage.getItem('card_key') ? JSON.parse(localStorage.getItem('card_key')) : arrayCards;
 
 class Card {
-    wrapper = cardContainer;
     static storage_array = [];
 
     constructor(template, content, id) {
@@ -32,7 +31,7 @@ class Card {
         this.element.querySelector('.card__title').textContent = this.content.name;
         this.element.querySelector('.card__image').src = this.content.link;
         this.element.querySelector('.card__image').alt = 'это фотография ' + this.content.name;
-        this.wrapper.append(this.element);
+        cardContainer.append(this.element);
         this.addListeners();
 
         Card.storage_array.push({
@@ -44,8 +43,8 @@ class Card {
 
     addListeners() {
         this.element.querySelector('.card__delete-button').addEventListener('click', function () {
-            let removeIndex = Card.storage_array.findIndex(item => item.id === parseInt(this.closest('.card').dataset.id)),
-                removedCard = Card.storage_array.splice(removeIndex, 1);
+            let removeIndex = Card.storage_array.findIndex(item => item.id === parseInt(this.closest('.card').dataset.id));
+            Card.storage_array.splice(removeIndex, 1)
             this.closest('.card').remove();
             void Card.storageUpdate();
         });
