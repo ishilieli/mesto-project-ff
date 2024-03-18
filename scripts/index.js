@@ -30,7 +30,6 @@ class Card {
         this.element.querySelector('.card__image').src = this.content.link;
         this.element.querySelector('.card__image').alt = 'это фотография ' + this.content.name;
         this.addListeners();
-        console.log(this.wrapper)
         this.wrapper.append(this.element);
 
         Card.storage_array.push({
