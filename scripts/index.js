@@ -1,66 +1,37 @@
 // @todo: Темплейт карточки
 
+const cardTemplate = document.querySelector('#card-template').content;
+
 // @todo: DOM узлы
+
+const cardContainer = document.querySelector('.places__list');
 
 // @todo: Функция создания карточки
 
+function createCard(cardContent, deleteHandler) {
+    const cardElement = cardTemplate.querySelector(".places__item").cloneNode(true),
+        cardDeleteBtn = cardElement.querySelector('.card__delete-button');
+
+    cardElement.querySelector('.card__title').textContent = cardContent.name;
+    cardElement.querySelector('.card__image').src = cardContent.link;
+    cardElement.querySelector('.card__image').alt = 'это фотография ' + cardContent.name;
+
+    cardDeleteBtn.addEventListener("click", (e) => deleteHandler(e));
+    return cardElement;
+}
+
 // @todo: Функция удаления карточки
+
+function deleteCard(e) {
+    e.target.closest('.places__item').remove();
+}
 
 // @todo: Вывести карточки на страницу
 
-
-import {initialCards as arrayCards} from "./cards.js";
-
-const container = document.querySelector('.content'),
-    cardContainer = container.querySelector('.places__list'),
-    cardTemplate = document.querySelector('#card-template').content,
-    array = localStorage.getItem('card_key') ? JSON.parse(localStorage.getItem('card_key')) : arrayCards;
-
-class Card {
-    static storage_array = [];
-
-    constructor(template, content, id) {
-        this.id = id;
-        this.template = template;
-        this.element = this.template.querySelector('.card').cloneNode(true);
-        this.content = content;
-    }
-
-    createCard() {
-        this.element.dataset.id = `${this.id}`;
-        this.element.querySelector('.card__title').textContent = this.content.name;
-        this.element.querySelector('.card__image').src = this.content.link;
-        this.element.querySelector('.card__image').alt = 'это фотография ' + this.content.name;
-        cardContainer.append(this.element);
-        this.addListeners();
-
-        Card.storage_array.push({
-            name: `${this.element.querySelector('.card__title').textContent}`,
-            link: `${this.element.querySelector('.card__image').src}`,
-            id: this.id,
-        });
-    }
-
-    addListeners() {
-        this.element.querySelector('.card__delete-button').addEventListener('click', function () {
-            let removeIndex = Card.storage_array.findIndex(item => item.id === parseInt(this.closest('.card').dataset.id));
-            Card.storage_array.splice(removeIndex, 1)
-            this.closest('.card').remove();
-            void Card.storageUpdate();
-        });
-        this.element.querySelector('.card__like-button').addEventListener('click', function () {
-            this.classList.toggle('is-active');
-        });
-    }
-
-    static storageUpdate() {
-        localStorage.setItem('card_key', JSON.stringify(Card.storage_array));
-    }
+function renderCards() {
+    initialCards.forEach(cardContent =>
+        cardContainer.append(createCard(cardContent, deleteCard))
+    );
 }
 
-array.forEach(function (item, id) {
-    const exemplar = new Card(cardTemplate, item, id);
-    exemplar.createCard();
-});
-
-Card.storageUpdate();
+renderCards();
