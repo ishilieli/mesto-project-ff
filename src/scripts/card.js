@@ -15,8 +15,8 @@ export function createCard(
     Object.assign(cardImage, { src: data.link, alt: data.name });
 
     cardDeleteBtn.addEventListener("click", () => deleteHandler(cardElement));
-    cardLikeBtn.addEventListener("click", (e) => likeHandler(e));
-    cardImage.addEventListener("click", () => zoomHandler(cardElement));
+    cardLikeBtn.addEventListener("click", (e) => likeHandler(cardLikeBtn));
+    cardImage.addEventListener("click", () => zoomHandler(data));
 
     return cardElement;
 }
@@ -25,6 +25,6 @@ export function deleteCard(card) {
     card.remove();
 }
 
-export function likeCard(e) {
-    e.currentTarget.classList.toggle('card__like-button_is-active');
+export function likeCard(btn) {
+    btn.classList.toggle('card__like-button_is-active');
 }
