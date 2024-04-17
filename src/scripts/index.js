@@ -31,6 +31,7 @@ function editFormSubmit(e) {
     nameInput.textContent = formEditProfile.name.value;
     nameJob.textContent = formEditProfile.description.value;
     closeModal(popupTypeEdit);
+    formEditProfile.reset();
 }
 
 function editCardSubmit(e) {
