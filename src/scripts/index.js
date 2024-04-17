@@ -2,23 +2,21 @@ import '../pages/index.css';
 import {createCard, deleteCard, likeCard} from "./card";
 import {closeModal, openModal} from "./modal";
 import {initialCards} from "./dataCards";
+import {
+    cardContainer,
+    formEditProfile, formNewPlace,
+    nameInput, nameJob,
+    popupCaption, popupCloseBtn,
+    popupImage,
+    popupTypeEdit, popupTypeImage, popupTypeNewCard,
+    profileAddTarget, profileEditTarget
+} from "./_variables";
 
-const $ = document.querySelector.bind(document);
 
-const cardContainer = $('.places__list'),
-    profileAddTarget = $('.profile__add-button'),
-    profileEditTarget = $('.profile__edit-button'),
-    nameInput = $(".profile__title"),
-    nameJob = $(".profile__description"),
-    popupImage = $('.popup__image'),
-    popupCaption = $('.popup__caption'),
-    popupTypeImage = $(".popup_type_image"),
-    popupTypeEdit = $(".popup_type_edit"),
-    popupTypeNewCard = $(".popup_type_new-card"),
-    popupCloseBtn = document.querySelectorAll('.popup__close'),
-    formEditProfile = document.forms.edit_profile,
-    formNewPlace = document.forms.new_place
-;
+function fillForm() {
+    formEditProfile.name.value = nameInput.textContent;
+    formEditProfile.description.value = nameJob.textContent;
+}
 
 function openModalImg(card) {
     openModal(popupTypeImage);
@@ -41,9 +39,6 @@ function editCardSubmit(e) {
     cardContainer.prepend(card);
     formNewPlace.reset();
     closeModal(popupTypeNewCard);
-    setTimeout(function (){
-        card.querySelector('img').offsetHeight < 50 ? card.querySelector('img').style.display = 'block' : '';
-    },200);
 }
 
 popupCloseBtn.forEach((button) => {
@@ -61,5 +56,8 @@ function renderCards() {
 renderCards();
 formEditProfile.addEventListener('submit', editFormSubmit);
 formNewPlace.addEventListener('submit', editCardSubmit);
-profileEditTarget.addEventListener("click", () => openModal(popupTypeEdit));
 profileAddTarget.addEventListener("click", () => openModal(popupTypeNewCard));
+profileEditTarget.addEventListener("click", function () {
+    openModal(popupTypeEdit);
+    fillForm();
+});
