@@ -19,8 +19,6 @@ const formPlaceValidator = new Validator(validationConfig, formNewPlace),
     formCreateValidator = new Validator(validationConfig, formEditProfile),
     formAvatarValidator = new Validator(validationConfig, formAvatar);
 
-let USER_ID = null;
-
 formPlaceValidator.enableValidation();
 formCreateValidator.enableValidation();
 formAvatarValidator.enableValidation();
@@ -43,8 +41,7 @@ Promise.all([getCardsData(), getUserData()])
     .then(([cards, userInfo]) => {
         userAvatar.style["background-image"] = `url("${userInfo.avatar}")`;
         fillFormAjax(userInfo);
-        USER_ID = userInfo._id;
-        cards.forEach(card => renderCards(card, deleteCard, likeCard, openModalImg, USER_ID));
+        cards.forEach(card => renderCards(card, deleteCard, likeCard, openModalImg, userInfo._id));
     })
     .catch(err => console.log(err));
 
