@@ -12,6 +12,14 @@ export function closeModal(modal) {
     document.removeEventListener('keydown', closeTargets);
 }
 
+export function modalLoading(isLoading, evt) {
+    if (isLoading) {
+        evt.submitter.textContent = "Сохранение...";
+    } else {
+        evt.submitter.textContent = "Сохранить";
+    }
+}
+
 function closeTargets(evt) {
     if (evt.key === 'Escape') {
         closeModal(document.querySelector('.popup_is-opened'));
