@@ -1,13 +1,14 @@
-import {openModal, closeModal} from "./modal";
-import {deleteUserCard, toggleLike} from "./api";
+import {openModal} from "./modal";
 import {popupDelete} from "./_variables";
 
 const cardTemplate = document.querySelector('#card-template').content;
 
+export let deletedId, deletedCard;
+
 export function createCard(
     data,
     deleteHandler,
-    likeHandler,
+    checkLikedOnCard,
     zoomHandler,
     userId
 ) {
@@ -30,38 +31,20 @@ export function createCard(
     if (userId !== data.owner._id) {
         cardDeleteBtn.style.display = 'none';
     } else {
-        cardDeleteBtn.addEventListener("click", function () {
+        cardDeleteBtn.addEventListener("click", function (e) {
+            deletedId = data._id;
+            deletedCard = e.target.closest('.card');
             openModal(popupDelete);
-            popupDelete.dataset.cardId = data._id;
-            popupDelete.addEventListener('submit', (e) => {
-                e.preventDefault();
-                deleteCard(cardElement, popupDelete);
-            })
         });
     }
 
-    cardLikeBtn.addEventListener("click", (e) => likeHandler(cardElement,e));
+    cardLikeBtn.addEventListener("click", (e) => checkLikedOnCard(e,likeCount,data._id));
     cardImage.addEventListener("click", () => zoomHandler(data));
     likeCount.textContent = data.likes.length;
 
     return cardElement;
 }
 
-
-export function deleteCard(card, modal) {
-    card.remove();
-    deleteUserCard(card.id)
-        .then(() => {closeModal(modal); card.remove();})
-        .catch(err => console.log(err))
-}
-
-export function likeCard(card, e) {
-    e.target.classList.toggle('card__like-button_is-active');
-    let result = e.target.classList.contains('card__like-button_is-active') ?
-        toggleLike(card.id, 'PUT') :
-        toggleLike(card.id, 'DELETE');
-    result.then(res => {
-        card.querySelector('.like-count').textContent = res.likes.length;
-    })
-        .catch(err => console.log(err))
+export function deleteCard(deletedCard) {
+    deletedCard.remove();
 }

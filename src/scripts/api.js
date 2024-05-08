@@ -1,56 +1,65 @@
-import {userConfig as user} from "./_variables";
+export class Api {
+    constructor(link,headers) {
+        this.link = link;
+        this.headers = headers;
+    }
+    getResponseStatus = r => (r.ok ? r.json() : Promise.reject(`Ошибка: ${r.status}`));
+    
+    ///Можно сделать универсальную функцию запроса с проверкой ответа, чтобы не дублировать эту проверку в каждом запросе:
+    request(url, options) {
+        // принимает два аргумента: урл и объект опций, как и `fetch`
+        return fetch(url, options).then(this.getResponseStatus)
+    }
+    setAvatar(link) {
+        return this.request(`${this.link}/users/me/avatar`, {
+            method: 'PATCH',
+            headers: this.headers,
+            body: JSON.stringify({avatar: link})
+        });
+    }
 
-const getResponseStatus = r => (r.ok ? r.json() : Promise.reject(`Ошибка: ${r.status}`));
+    getUserData() {
+        return this.request(`${this.link}/users/me`, {
+            headers: this.headers
+        });
+    }
 
-export function setAvatar(link) {
-    return fetch(`${user.baseUrl}/users/me/avatar`, {
-        method: 'PATCH',
-        headers: user.headers,
-        body: JSON.stringify({avatar: link})
-    }).then(r => getResponseStatus(r));
-}
+    editProfile(name, about)  {
+        return this.request(`${this.link}/users/me`, {
+            method: 'PATCH',
+            headers: this.headers,
+            body: JSON.stringify({
+                name: name,
+                about: about,
+            })
+        });
+    }
 
-export function getUserData() {
-    return fetch(`${user.baseUrl}/users/me`, {
-        headers: user.headers
-    }).then(r => getResponseStatus(r));
-}
+    getCardsData() {
+        return this.request(`${this.link}/cards`, {
+            headers: this.headers
+        });
+    }
 
-export function editProfile(name, about)  {
-    return fetch(`${user.baseUrl}/users/me`, {
-        method: 'PATCH',
-        headers: user.headers,
-        body: JSON.stringify({
-            name: name,
-            about: about,
-        })
-    }).then(r => getResponseStatus(r));
-}
+    createUserCard(data) {
+        return this.request(`${this.link}/cards`, {
+            headers: this.headers,
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    }
 
-export function getCardsData() {
-    return fetch(`${user.baseUrl}/cards`, {
-        headers: user.headers
-    }).then(r => getResponseStatus(r));
-}
+    deleteUserCard(id) {
+        return this.request(`${this.link}/cards/${id}`, {
+            headers: this.headers,
+            method: 'DELETE',
+        });
+    }
 
-export function createUserCard(data) {
-    return fetch(`${user.baseUrl}/cards`, {
-        headers: user.headers,
-        method: 'POST',
-        body: JSON.stringify(data)
-    }).then(r => getResponseStatus(r));
-}
-
-export function deleteUserCard(id) {
-    return fetch(`${user.baseUrl}/cards/${id}`, {
-        headers: user.headers,
-        method: 'DELETE',
-    }).then(r => getResponseStatus(r));
-}
-
-export function toggleLike(id,method) {
-    return fetch(`${user.baseUrl}/cards/likes/${id}`, {
-        method: `${method}`,
-        headers: user.headers
-    }).then(r => getResponseStatus(r));
+    toggleLike(id,method) {
+        return this.request(`${this.link}/cards/likes/${id}`, {
+            method: `${method}`,
+            headers: this.headers
+        });
+    }
 }

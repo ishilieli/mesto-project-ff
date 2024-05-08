@@ -1,23 +1,25 @@
 import '../pages/index.css';
-import {createCard, deleteCard, likeCard} from "./card";
-import {closeModal, modalLoading, openModal} from "./modal";
+import {createCard, deleteCard, deletedCard, deletedId} from "./card";
+import {closeModal, renderLoading, openModal} from "./modal";
 import {
     cardContainer,
     formEditProfile, formNewPlace, formAvatar,
     popupTypeAvatar, userAvatar, validationConfig,
     nameInput, nameJob,
-    popupCaption, popupCloseBtn,
+    popupCaption, popupCloseBtns,
     popupImage,
     popupTypeEdit, popupTypeImage, popupTypeNewCard,
-    profileAddTarget, profileEditTarget, popupDelete
+    profileAddTarget, profileEditTarget, popupDelete, userConfig
 } from "./_variables";
 
 import {Validator} from "./validation";
-import {createUserCard, deleteUserCard, editProfile, getCardsData, getUserData, setAvatar} from "./api";
+import {Api} from "./api";
 
 const formPlaceValidator = new Validator(validationConfig, formNewPlace),
     formCreateValidator = new Validator(validationConfig, formEditProfile),
     formAvatarValidator = new Validator(validationConfig, formAvatar);
+
+const api = new Api(userConfig.baseUrl, userConfig.headers);
 
 formPlaceValidator.enableValidation();
 formCreateValidator.enableValidation();
@@ -37,25 +39,25 @@ function fillFormAjax(data) {
     formEditProfile.description.value = data.about;
 }
 
-Promise.all([getCardsData(), getUserData()])
+Promise.all([api.getCardsData(), api.getUserData()])
     .then(([cards, userInfo]) => {
         userAvatar.style["background-image"] = `url("${userInfo.avatar}")`;
         fillFormAjax(userInfo);
-        cards.forEach(card => renderCards(card, deleteCard, likeCard, openModalImg, userInfo._id));
+        cards.forEach(card => renderCards(card, deleteCard, checkLikedOnCard, openModalImg, userInfo._id));
     })
     .catch(err => console.log(err));
 
 function editAvatarSumbit(e) {
     e.preventDefault();
-    modalLoading(true, e);
-    setAvatar(formAvatar.link.value)
-        .then(r => userAvatar.style["background-image"] = `url("${r.avatar}")`)
-        .catch(err => console.log(err))
-        .finally(() => {
-            modalLoading(false, e);
+    renderLoading(true, e);
+    api.setAvatar(formAvatar.link.value)
+        .then(r => {
+            userAvatar.style["background-image"] = `url("${r.avatar}")`;
             closeModal(popupTypeAvatar);
             formAvatar.reset();
-        });
+        })
+        .catch(err => console.log(err))
+        .finally(() => renderLoading(false, e));
 }
 
 function openModalImg(card) {
@@ -67,47 +69,68 @@ function openModalImg(card) {
 function editFormSubmit(e) {
     e.preventDefault();
     const user = {name: formEditProfile.name.value, about: formEditProfile.description.value};
-    modalLoading(true, e);
-    editProfile(user.name, user.about)
+    renderLoading(true, e);
+    api.editProfile(user.name, user.about)
         .then(res => {
             nameInput.textContent = res.name;
             nameJob.textContent = res.about;
+            closeModal(popupTypeEdit);
         })
         .catch(err => console.log(err))
-        .finally(() => {
-            modalLoading(false, e);
-            closeModal(popupTypeEdit);
-        });
+        .finally(() => renderLoading(false, e));
 }
 
 function editCardSubmit(e) {
     e.preventDefault();
-    modalLoading(true, e)
+    renderLoading(true, e)
     const obj = {name: e.target.place.value, link: e.target.link.value, likes: []};
-    createUserCard(obj)
-        .then(r => cardContainer.prepend(createCard(r, deleteCard, likeCard, openModalImg, r.owner._id)))
-        .finally(() => {
-            modalLoading(false, e);
+    api.createUserCard(obj)
+        .then(r => {
+            cardContainer.prepend(createCard(r, deleteCard, checkLikedOnCard, openModalImg, r.owner._id));
             closeModal(popupTypeNewCard);
             formNewPlace.reset();
-        });
+        })
+        .finally(() => renderLoading(false, e));
 }
 
-popupCloseBtn.forEach((button) => {
+popupCloseBtns.forEach((button) => {
     const popup = button.closest(".popup");
     button.addEventListener("click", () => closeModal(popup));
 });
 
-function renderCards(card, deleteCard, likeCard, openModalImg, userInfo) {
-    cardContainer.append(createCard(card, deleteCard, likeCard, openModalImg, userInfo))
+function renderCards(card, deleteCard, checkLikedOnCard, openModalImg, userInfo) {
+    cardContainer.append(createCard(card, deleteCard, checkLikedOnCard, openModalImg, userInfo))
+}
+
+function handleConfirmSubmit(e) {
+    e.preventDefault();
+    api.deleteUserCard(deletedId)
+        .then(() => {
+            closeModal(popupDelete);
+            deleteCard(deletedCard);
+        })
+        .catch(err => console.log(err))
+}
+
+function checkLikedOnCard(btn, count, id) {
+    let result = btn.target.classList.contains('card__like-button_is-active') ?
+        api.toggleLike(id, 'DELETE') :
+        api.toggleLike(id, 'PUT');
+    result.then(res => {
+        btn.target.classList.toggle('card__like-button_is-active');
+        count.textContent = res.likes.length;
+    })
+        .catch(err => console.log(err))
 }
 
 formEditProfile.addEventListener('submit', editFormSubmit);
 formNewPlace.addEventListener('submit', editCardSubmit);
 formAvatar.addEventListener('submit', editAvatarSumbit);
+popupDelete.addEventListener('submit', handleConfirmSubmit);
 
 userAvatar.addEventListener("click", function (e) {
     openModal(popupTypeAvatar);
+    formAvatarValidator.toggleButtonState();
 });
 profileAddTarget.addEventListener("click", function () {
     openModal(popupTypeNewCard);

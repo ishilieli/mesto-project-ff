@@ -12,7 +12,7 @@ export function closeModal(modal) {
     document.removeEventListener('keydown', closeTargets);
 }
 
-export function modalLoading(isLoading, evt) {
+export function renderLoading(isLoading, evt) {
     if (isLoading) {
         evt.submitter.textContent = "Сохранение...";
     } else {
