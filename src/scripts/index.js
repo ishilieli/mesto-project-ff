@@ -1,5 +1,5 @@
 import '../pages/index.css';
-import {createCard, deleteCard, deletedCard, deletedId} from "./card";
+import {createCard, deleteCard} from "./card";
 import {closeModal, renderLoading, openModal} from "./modal";
 import {
     cardContainer,
@@ -43,7 +43,7 @@ Promise.all([api.getCardsData(), api.getUserData()])
     .then(([cards, userInfo]) => {
         userAvatar.style["background-image"] = `url("${userInfo.avatar}")`;
         fillFormAjax(userInfo);
-        cards.forEach(card => renderCards(card, deleteCard, checkLikedOnCard, openModalImg, userInfo._id));
+        cards.forEach(card => renderCards(card, deleteCard, checkLikedOnCard, openModalImg, userInfo._id, confirmCallback));
     })
     .catch(err => console.log(err));
 
@@ -66,6 +66,13 @@ function openModalImg(card) {
     popupCaption.textContent = card.name;
 }
 
+let deletedId, deletedCard;
+function confirmCallback(e,id) {
+    deletedId = id;
+    deletedCard = e.target.closest('.card');
+    openModal(popupDelete);
+}
+
 function editFormSubmit(e) {
     e.preventDefault();
     const user = {name: formEditProfile.name.value, about: formEditProfile.description.value};
@@ -86,7 +93,7 @@ function editCardSubmit(e) {
     const obj = {name: e.target.place.value, link: e.target.link.value, likes: []};
     api.createUserCard(obj)
         .then(r => {
-            cardContainer.prepend(createCard(r, deleteCard, checkLikedOnCard, openModalImg, r.owner._id));
+            cardContainer.prepend(createCard(r, deleteCard, checkLikedOnCard, openModalImg, r.owner._id, confirmCallback));
             closeModal(popupTypeNewCard);
             formNewPlace.reset();
         })
@@ -98,8 +105,8 @@ popupCloseBtns.forEach((button) => {
     button.addEventListener("click", () => closeModal(popup));
 });
 
-function renderCards(card, deleteCard, checkLikedOnCard, openModalImg, userInfo) {
-    cardContainer.append(createCard(card, deleteCard, checkLikedOnCard, openModalImg, userInfo))
+function renderCards(card, deleteCard, checkLikedOnCard, openModalImg, userInfo, confirmCallback) {
+    cardContainer.append(createCard(card, deleteCard, checkLikedOnCard, openModalImg, userInfo, confirmCallback))
 }
 
 function handleConfirmSubmit(e) {

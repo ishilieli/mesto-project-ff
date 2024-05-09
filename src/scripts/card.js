@@ -1,16 +1,13 @@
-import {openModal} from "./modal";
-import {popupDelete} from "./_variables";
-
 const cardTemplate = document.querySelector('#card-template').content;
 
-export let deletedId, deletedCard;
 
 export function createCard(
     data,
     deleteHandler,
     checkLikedOnCard,
     zoomHandler,
-    userId
+    userId,
+    confirmCallback
 ) {
     const cardElement = cardTemplate.querySelector(".places__item").cloneNode(true),
         cardDeleteBtn = cardElement.querySelector('.card__delete-button'),
@@ -31,7 +28,7 @@ export function createCard(
     if (userId !== data.owner._id) {
         cardDeleteBtn.style.display = 'none';
     } else {
-        cardDeleteBtn.addEventListener("click", function (e) {deleteCallback(e,data._id)});
+        cardDeleteBtn.addEventListener("click", function (e) {confirmCallback(e,data._id)});
     }
 
     cardLikeBtn.addEventListener("click", (e) => checkLikedOnCard(e,likeCount,data._id));
@@ -39,12 +36,6 @@ export function createCard(
     likeCount.textContent = data.likes.length;
 
     return cardElement;
-}
-
-function deleteCallback(e,id) {
-    deletedId = id;
-    deletedCard = e.target.closest('.card');
-    openModal(popupDelete);
 }
 
 export function deleteCard(deletedCard) {
