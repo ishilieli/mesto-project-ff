@@ -31,11 +31,7 @@ export function createCard(
     if (userId !== data.owner._id) {
         cardDeleteBtn.style.display = 'none';
     } else {
-        cardDeleteBtn.addEventListener("click", function (e) {
-            deletedId = data._id;
-            deletedCard = e.target.closest('.card');
-            openModal(popupDelete);
-        });
+        cardDeleteBtn.addEventListener("click", function (e) {deleteCallback(e,data._id)});
     }
 
     cardLikeBtn.addEventListener("click", (e) => checkLikedOnCard(e,likeCount,data._id));
@@ -43,6 +39,12 @@ export function createCard(
     likeCount.textContent = data.likes.length;
 
     return cardElement;
+}
+
+function deleteCallback(e,id) {
+    deletedId = id;
+    deletedCard = e.target.closest('.card');
+    openModal(popupDelete);
 }
 
 export function deleteCard(deletedCard) {
